@@ -13,7 +13,18 @@
 package org.sample;
 
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.results.RunResult;
+import org.openjdk.jmh.results.format.ResultFormatFactory;
+import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
+import org.openjdk.jmh.runner.options.VerboseMode;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
@@ -25,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class Jdk11PerfRegressionBenchmark {
     private Global global;
+    @Param("") String jvm;
 
     static abstract class SymbolTable {
         class Phase {
@@ -73,5 +85,29 @@ public class Jdk11PerfRegressionBenchmark {
     @Benchmark public void setPhase() {
         global.setPhase(global.curRun.p1);
         global.setPhase(global.curRun.p2);
+    }
+    public static void main(String[] args) throws RunnerException {
+        ArrayList<String> argsList = new ArrayList<>();
+        argsList.addAll(Arrays.asList(args));
+        String include = argsList.remove(0);
+
+        Options baseOpts = new OptionsBuilder()
+                .include(Jdk11PerfRegressionBenchmark.class.getName() + "." + include)
+                .warmupTime(TimeValue.milliseconds(200))
+                .measurementTime(TimeValue.milliseconds(200))
+                .warmupIterations(5)
+                .measurementIterations(5)
+                .forks(2)
+                .verbosity(VerboseMode.SILENT)
+                .build();
+        ArrayList<RunResult> results = new ArrayList<>();
+        for (String jvm : argsList) {
+            Options theseOpts = new OptionsBuilder()
+                    .parent(baseOpts).jvm(jvm).param("jvm", jvm.replaceAll("(^.*@|/Contents.*$)", "")).build();
+            Runner runner = new Runner(theseOpts);
+            results.addAll(runner.run());
+        }
+        ResultFormatFactory.getInstance(ResultFormatType.TEXT, System.out).writeOut(results);
+        ResultFormatFactory.getInstance(ResultFormatType.JSON, "result.json").writeOut(results);
     }
 }

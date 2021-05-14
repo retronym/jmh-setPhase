@@ -5,20 +5,13 @@ Benchmark modelled on hot method in scalac, `SymbolTable.phase_=`
 
 
 ```
-% (jabba use adopt@1.8.0-272 && mvn clean install)
-% for jdk in adopt@1.8.0-272 adopt@1.11.0-9; do (java -jar /Users/jz/code/test/target/benchmarks.jar -jvm "$(jabba use $jdk; which java)"); done
-```
-
-```
-# VM version: JDK 1.8.0_272, OpenJDK 64-Bit Server VM, 25.272-b10
-# VM invoker: /Users/jz/.jabba/jdk/adopt@1.8.0-272/Contents/Home/bin/java
-Benchmark                              Mode  Cnt  Score   Error  Units
-Jdk11PerfRegressionBenchmark.setPhase  avgt   20  2.202 ± 0.018  ns/op
-```
-
-```
-# VM version: JDK 11.0.9, OpenJDK 64-Bit Server VM, 11.0.9+11
-# VM invoker: /Users/jz/.jabba/jdk/adopt@1.11.0-9/Contents/Home/bin/java
-Benchmark                              Mode  Cnt  Score   Error  Units
-Jdk11PerfRegressionBenchmark.setPhase  avgt   20  3.591 ± 0.031  ns/op
+$ mvn clean install && java -cp /Users/jz/code/test/target/benchmarks.jar org.sample.Jdk11PerfRegressionBenchmark setPhase /Users/jz/.jabba/jdk/adopt@1.8.0-272/Contents/Home/bin/java /Users/jz/.jabba/jdk/adopt@1.9.0-0/Contents/Home/bin/java /Users/jz/.jabba/jdk/adopt@1.10.0-2/Contents/Home/bin/java /Users/jz/.jabba/jdk/adopt@1.11.0-9/Contents/Home/bin/java /Users/jz/.jabba/jdk/adopt@1.15.0-1/Contents/Home/bin/java /Users/jz/.jabba/jdk/adopt@1.16.0-1/Contents/Home/bin/java
+...
+Benchmark                                  (jvm)  Mode  Cnt  Score   Error  Units
+Jdk11PerfRegressionBenchmark.setPhase  1.8.0-272  avgt   10  2.202 ± 0.039  ns/op
+Jdk11PerfRegressionBenchmark.setPhase    1.9.0-0  avgt   10  3.072 ± 0.039  ns/op
+Jdk11PerfRegressionBenchmark.setPhase   1.10.0-2  avgt   10  3.824 ± 0.036  ns/op
+Jdk11PerfRegressionBenchmark.setPhase   1.11.0-9  avgt   10  3.542 ± 0.036  ns/op
+Jdk11PerfRegressionBenchmark.setPhase   1.15.0-1  avgt   10  3.066 ± 0.027  ns/op
+Jdk11PerfRegressionBenchmark.setPhase   1.16.0-1  avgt   10  3.058 ± 0.012  ns/op
 ```
