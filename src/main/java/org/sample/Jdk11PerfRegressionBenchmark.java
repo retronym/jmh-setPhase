@@ -49,6 +49,7 @@ public class Jdk11PerfRegressionBenchmark {
         private Phase ph;
         private int per;
         abstract int currentRunId();
+        abstract int currentRunIdShifted();
         int period(int rid, int pid) {
             return (rid << 8) + pid;
         }
@@ -56,17 +57,35 @@ public class Jdk11PerfRegressionBenchmark {
             this.ph = p;
             this.per = period(currentRunId(), p.id);
         }
+        int period2(int ridShifted, int pid) {
+            return ridShifted + pid;
+        }
+        void setPhase2(Phase p) {
+            this.ph = p;
+            this.per = period2(currentRunIdShifted(), p.id);
+        }
+        void setPhase3(Phase p) {
+            this.ph = p;
+            this.per = currentRunIdShifted();
+        }
     }
     static class Global extends SymbolTable {
         private int curRunId;
+        private int curRunIdShifted;
         Run curRun;
         @Override
         int currentRunId() {
             return curRunId;
         }
+
+        @Override
+        int currentRunIdShifted() {
+            return curRunIdShifted;
+        }
+
         class Run {
             public Run() {
-                curRunId += 1;
+                curRunId += 1; curRunIdShifted = curRunId << 8;
             }
 
             Phase p1 = new Phase(0);
@@ -86,6 +105,15 @@ public class Jdk11PerfRegressionBenchmark {
         global.setPhase(global.curRun.p1);
         global.setPhase(global.curRun.p2);
     }
+    @Benchmark public void setPhase2() {
+        global.setPhase2(global.curRun.p1);
+        global.setPhase2(global.curRun.p2);
+    }
+    @Benchmark public void setPhase3() {
+        global.setPhase3(global.curRun.p1);
+        global.setPhase3(global.curRun.p2);
+    }
+
     public static void main(String[] args) throws RunnerException {
         ArrayList<String> argsList = new ArrayList<>();
         argsList.addAll(Arrays.asList(args));
